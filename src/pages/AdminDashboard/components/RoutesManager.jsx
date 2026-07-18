@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { getRoutes, createRoute, deleteRoute } from '../api/route.api';
-import { getResources } from '../api/resource.api';
+import { getRoutes, createRoute, deleteRoute } from '../../../api/route.api';
+import { getResources } from '../../../api/resource.api';
 
 const RoutesManager = () => {
   const [routes, setRoutes] = useState([]);

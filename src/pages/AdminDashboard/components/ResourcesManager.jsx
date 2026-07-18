@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { getResources, uploadFile, createResource, deleteResource } from '../api/resource.api';
+import { getResources, uploadFile, createResource, deleteResource } from '../../../api/resource.api';
 
 const ResourcesManager = () => {
   const [resources, setResources] = useState([]);
