@@ -35,12 +35,12 @@ const AdminDashboard = () => {
   useEffect(() => {
     const loadProfile = async () => {
       const response = await fetchDataBackend('/auth/profile', null, 'GET', {}, false);
-      
+
       if (response && !response.error) {
         const userName = response.name || response.user?.name || 'Administrador';
         const nameParts = userName.split(' ');
-        
-        const calculatedInitials = nameParts.length > 1 
+
+        const calculatedInitials = nameParts.length > 1
           ? `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase()
           : userName.substring(0, 2).toUpperCase();
 
@@ -52,7 +52,7 @@ const AdminDashboard = () => {
       }
       setLoadingProfile(false);
     };
-    
+
     loadProfile();
   }, []);
 

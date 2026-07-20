@@ -4,13 +4,15 @@ import { useFetch } from '../../hooks/useFetch';
 import AuthContext from '../../context/AuthProvider';
 import { getRoutes } from '../../api/route.api';
 
-// Importaciones exclusivas del ESTUDIANTE (Con RouteDetails corregido)
 import StudentSidebar from './components/StudentSidebar';
 import StudentHeader from './components/StudentHeader';
 import DashboardHome from './components/DashboardHome';
 import RouteExplorer from './components/RouteExplorer';
 import RouteDetails from './components/RouteDetails';
 import Chatbot from './components/Chatbot';
+import RoutesViewer from './components/RoutesViewer';
+import StudentProfile from './components/StudentProfile'; 
+import RouteGenerator from './components/RouteGenerator';
 
 const StudentDashboard = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
@@ -98,10 +100,14 @@ const StudentDashboard = () => {
     setShowChat(true);
   };
 
+  const handleUpdateUserPhoto = (newPhotoUrl) => {
+    setUserData(prev => ({ ...prev, profilePicture: newPhotoUrl }));
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'inicio':
-        return <DashboardHome />;
+        return <DashboardHome userData={userData} setActiveTab={setActiveTab} />;
       case 'explorar':
         return (
           <RouteExplorer 
@@ -115,6 +121,20 @@ const StudentDashboard = () => {
             }} 
           />
         );
+      case 'mis-rutas':
+        return (
+          <RoutesViewer 
+            setActiveTab={setActiveTab}
+            onOpenChat={(moduleId, moduleTitle) => {
+              console.log("Abrir chat para el módulo:", moduleTitle);
+              setShowChat(true);
+            }} 
+          />
+        );
+      case 'perfil':
+        return <StudentProfile userData={userData} onPhotoUpdate={handleUpdateUserPhoto} />;
+      case 'crear-ruta':
+        return <RouteGenerator onBack={() => setActiveTab('mis-rutas')} />;
       case 'detalle-ruta':
         return (
           <RouteDetails 
@@ -151,7 +171,7 @@ const StudentDashboard = () => {
       <StudentSidebar activeTab={activeTab} setActiveTab={setActiveTab} userData={userData} toggleTheme={toggleTheme} onLogout={handleLogout} />
 
       <div className="flex-grow flex flex-col min-w-0 relative">
-        <StudentHeader userData={userData} />
+        <StudentHeader userData={userData} setActiveTab={setActiveTab} />
         <main className="flex-grow p-6 md:p-10 overflow-y-auto">
           {renderContent()}
         </main>

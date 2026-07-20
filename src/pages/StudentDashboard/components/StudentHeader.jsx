@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const StudentHeader = ({ userData }) => {
+const StudentHeader = ({ userData, setActiveTab }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
@@ -32,7 +32,15 @@ const StudentHeader = ({ userData }) => {
           {showProfileMenu && (
             <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden z-50">
               <div className="p-2">
-                <button onClick={() => setShowProfileMenu(false)} className="w-full text-left px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">Gestionar Perfil</button>
+                <button 
+                  onClick={() => {
+                    setActiveTab('perfil');
+                    setShowProfileMenu(false);
+                  }} 
+                  className="w-full text-left px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors"
+                >
+                  Gestionar Perfil
+                </button>
               </div>
             </div>
           )}
