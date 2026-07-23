@@ -61,7 +61,7 @@ const Register = () => {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-
+      
       const response = await fetch(`${apiUrl}/auth/verify-cedula/${dataForm.cedula}`);
       const personData = await response.json();
 
@@ -70,7 +70,8 @@ const Register = () => {
         return;
       }
     } catch (error) {
-      console.warn("Validación externa omitida por contingencia.");
+      setApiError("No se pudo verificar la cédula con el Registro Civil en este momento.");
+      return; 
     }
 
     try {
@@ -82,7 +83,7 @@ const Register = () => {
       };
 
       const res = await fetchDataBackend("/auth/register", formattedData, "POST");
-
+      
       if (res && !res.error) {
         navigate("/login");
       } else {
