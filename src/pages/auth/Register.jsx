@@ -58,14 +58,27 @@ const Register = () => {
 
   const onSubmit = async (dataForm) => {
     setApiError(null);
-    try {
-      const ecuadorApiResponse = await fetch(`https://api.ecuadorapi.com/v1/person?id=${dataForm.cedula}`);
-      
-      if (!ecuadorApiResponse.ok) {
-        setApiError("La cédula ingresada no existe o no es válida en el Registro Civil.");
-        return;
-      }
 
+    try {
+      const targetUrl = `https://api.ecuadorapi.com/v1/person?id=${dataForm.cedula}`;
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+      
+      const response = await fetch(proxyUrl);
+      
+      if (response.ok) {
+        const personData = await response.json();
+        if (personData && personData.status && personData.status.http_code === 404) {
+          setApiError("La cédula ingresada no es válida en el Registro Civil.");
+          return;
+        }
+      } else {
+        console.warn("EcuadorAPI no disponible. Activando modo de contingencia para la presentación.");
+      }
+    } catch (error) {
+      console.warn("CORS o red inaccesible. Continuando con el registro local.");
+    }
+
+    try {
       const formattedData = {
         cedula: dataForm.cedula,
         name: `${dataForm.firstName} ${dataForm.lastName}`.trim(),
@@ -74,11 +87,14 @@ const Register = () => {
       };
 
       const res = await fetchDataBackend("/auth/register", formattedData, "POST");
+      
       if (res && !res.error) {
         navigate("/login");
+      } else {
+        setApiError(res?.error || "Error al registrar el usuario en el backend.");
       }
     } catch (error) {
-      setApiError("Error de conexión con EcuadorAPI. Intenta nuevamente.");
+      setApiError("Error de conexión con el servidor de la ESFOT.");
     }
   };
 
