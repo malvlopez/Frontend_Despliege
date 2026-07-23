@@ -35,7 +35,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-  
+
   const { fetchDataBackend, loading } = useFetch();
   const navigate = useNavigate();
 
@@ -60,22 +60,17 @@ const Register = () => {
     setApiError(null);
 
     try {
-      const targetUrl = `https://api.ecuadorapi.com/v1/person?id=${dataForm.cedula}`;
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-      
-      const response = await fetch(proxyUrl);
-      
-      if (response.ok) {
-        const personData = await response.json();
-        if (personData && personData.status && personData.status.http_code === 404) {
-          setApiError("La cédula ingresada no es válida en el Registro Civil.");
-          return;
-        }
-      } else {
-        console.warn("EcuadorAPI no disponible. Activando modo de contingencia para la presentación.");
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
+      const response = await fetch(`${apiUrl}/auth/verify-cedula/${dataForm.cedula}`);
+      const personData = await response.json();
+
+      if (personData && personData.status && personData.status.http_code === 404) {
+        setApiError("La cédula ingresada no es válida en el Registro Civil.");
+        return;
       }
     } catch (error) {
-      console.warn("CORS o red inaccesible. Continuando con el registro local.");
+      console.warn("Validación externa omitida por contingencia.");
     }
 
     try {
@@ -87,11 +82,11 @@ const Register = () => {
       };
 
       const res = await fetchDataBackend("/auth/register", formattedData, "POST");
-      
+
       if (res && !res.error) {
         navigate("/login");
       } else {
-        setApiError(res?.error || "Error al registrar el usuario en el backend.");
+        setApiError(res?.error || "Error al registrar el usuario.");
       }
     } catch (error) {
       setApiError("Error de conexión con el servidor de la ESFOT.");
@@ -100,9 +95,9 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-6 transition-colors duration-300 relative font-sans">
-      
-      <Link 
-        to="/" 
+
+      <Link
+        to="/"
         className="absolute top-6 left-6 md:top-10 md:left-10 flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 font-semibold transition-colors bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 z-10"
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -111,8 +106,8 @@ const Register = () => {
         Regresar
       </Link>
 
-      <button 
-        onClick={toggleTheme} 
+      <button
+        onClick={toggleTheme}
         className="absolute top-6 right-6 md:top-10 md:right-10 p-2 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-400 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors z-10"
       >
         {theme === 'light' ? (
@@ -124,7 +119,7 @@ const Register = () => {
 
       <div className="w-full max-w-lg bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-700 p-8 md:p-12 relative overflow-hidden my-12 mt-20 md:mt-12">
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 to-violet-600"></div>
-        
+
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-4">
             <div className="bg-violet-600 text-white p-1.5 rounded-md font-bold text-lg">ESFOT</div>
@@ -141,11 +136,11 @@ const Register = () => {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          
+
           <div>
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Cédula de Identidad</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="17xxxxxxxx"
               maxLength="10"
               className={`w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border ${errors.cedula ? 'border-red-500' : 'border-slate-200 dark:border-slate-600'} text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-600 focus:border-transparent outline-none transition-all placeholder-slate-400`}
@@ -157,19 +152,19 @@ const Register = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Nombres</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Ej. Andrés Josué"
                 className={`w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border ${errors.firstName ? 'border-red-500' : 'border-slate-200 dark:border-slate-600'} text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-600 focus:border-transparent outline-none transition-all placeholder-slate-400`}
                 {...register("firstName")}
               />
               {errors.firstName && <p className="text-red-500 dark:text-red-400 text-xs mt-1.5 font-medium">{errors.firstName.message}</p>}
             </div>
-            
+
             <div>
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Apellidos</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Ej. Caiza Pilco"
                 className={`w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border ${errors.lastName ? 'border-red-500' : 'border-slate-200 dark:border-slate-600'} text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-600 focus:border-transparent outline-none transition-all placeholder-slate-400`}
                 {...register("lastName")}
@@ -180,8 +175,8 @@ const Register = () => {
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Correo Institucional (@epn.edu.ec)</label>
-            <input 
-              type="email" 
+            <input
+              type="email"
               placeholder="andres.caiza@epn.edu.ec"
               className={`w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border ${errors.email ? 'border-red-500' : 'border-slate-200 dark:border-slate-600'} text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-600 focus:border-transparent outline-none transition-all placeholder-slate-400`}
               {...register("email")}
@@ -192,7 +187,7 @@ const Register = () => {
           <div>
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Contraseña</label>
             <div className="relative">
-              <input 
+              <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Mínimo 8 caracteres"
                 className={`w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border ${errors.password ? 'border-red-500' : 'border-slate-200 dark:border-slate-600'} text-slate-900 dark:text-white focus:ring-2 focus:ring-violet-600 focus:border-transparent outline-none transition-all placeholder-slate-400`}
@@ -213,8 +208,8 @@ const Register = () => {
             Al registrarte, aceptas que el sistema validará tu identidad mediante el Registro Civil y procesará tus datos académicos.
           </p>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
             className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-violet-500/30 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:active:scale-100 flex justify-center items-center gap-2 mt-4"
           >
